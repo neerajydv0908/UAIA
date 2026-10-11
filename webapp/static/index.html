@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UAIA · U ask, I answer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%224%22 fill=%22%231f5f8b%22/%3E%3Cpath d=%22M4 8.5l2.5 2.5L12 5.5%22 stroke=%22white%22 stroke-width=%222%22 fill=%22none%22/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f6f5f1; --surface: #ffffff; --ink: #1b1b19; --muted: #5d5c57; --faint: #8b8a84;
+    --line: #e3e1da; --accent: #1f5f8b; --accent-ink: #ffffff;
+    --pass: #1e7a46; --pass-wash: #e7f3ec; --warn: #9a6200; --warn-wash: #fbf1dc;
+    --fail: #b3362f; --fail-wash: #f9e6e4; --mark: #fff6d6;
+    --serif: "Iowan Old Style", "Charter", "Georgia", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --page: #121211; --surface: #1b1b1a; --ink: #f0efe9; --muted: #b5b3ab; --faint: #85837c;
+      --line: #2e2d2a; --accent: #6aa8d8; --accent-ink: #0d1b26;
+      --pass: #5cc48a; --pass-wash: #17281e; --warn: #e2b155; --warn-wash: #2b2416;
+      --fail: #ec7a72; --fail-wash: #2e1a18; --mark: #2f2a17;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.55 var(--sans); }
+  header { border-bottom: 1px solid var(--line); background: var(--surface); }
+  .bar { max-width: 820px; margin: 0 auto; padding: 14px 20px; display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
+  .brand { font-weight: 650; letter-spacing: -0.01em; }
+  .brand .tag { font-weight: 450; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+  #status { color: var(--muted); font-size: 13px; }
+  main { max-width: 820px; margin: 0 auto; padding: 28px 20px 80px; }
+  h1 { font: 600 28px/1.25 var(--serif); margin: 0 0 6px; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); margin: 0 0 22px; max-width: 62ch; }
+  form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  textarea { width: 100%; border: 0; resize: none; font: 17px/1.5 var(--sans); background: transparent; color: var(--ink); min-height: 56px; outline: none; }
+  .row { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .hint { color: var(--faint); font-size: 13px; }
+  button { font: 600 15px var(--sans); border-radius: 8px; border: 1px solid var(--line); padding: 8px 14px; background: var(--surface); color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button:disabled { opacity: .55; cursor: default; }
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 0; }
+  .examples button { font-weight: 500; font-size: 13px; color: var(--muted); padding: 5px 10px; border-radius: 999px; }
+  #working { margin: 22px 0; color: var(--muted); display: none; }
+  #working.on { display: block; }
+  .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 8px; animation: pulse 1.2s infinite ease-in-out; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+  #result { margin-top: 26px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+  .badge { display: inline-block; font: 600 12px var(--sans); letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; margin-bottom: 12px; }
+  .badge.verified { color: var(--pass); background: var(--pass-wash); }
+  .badge.partly { color: var(--warn); background: var(--warn-wash); }
+  .badge.abstained { color: var(--fail); background: var(--fail-wash); }
+  .answer { font: 19px/1.65 var(--serif); margin: 0; }
+  .s-unknown { text-decoration: underline dotted var(--warn) 2px; text-underline-offset: 4px; }
+  .cite { font: 600 11px var(--sans); color: var(--accent); vertical-align: super; margin-left: 1px; text-decoration: none; }
+  .note { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+  h2 { font: 600 13px var(--sans); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  ol.sources { margin: 0; padding-left: 22px; }
+  ol.sources li { margin: 6px 0; }
+  ol.sources li:target { background: var(--mark); }
+  .src-meta { color: var(--faint); font-size: 13px; }
+  a { color: var(--accent); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chosen { font-weight: 650; }
+  .checks li { margin: 6px 0; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+  .dot.pass, .dot.done { background: var(--pass); }
+  .dot.unknown, .dot.limited, .dot.waiting { background: var(--warn); }
+  .dot.fail { background: var(--fail); }
+  .dot.skipped { background: var(--faint); }
+  ul.plain { list-style: none; padding: 0; margin: 0; }
+  ul.trace li { padding: 4px 0; font-size: 14px; }
+  .step { color: var(--faint); font-variant-numeric: tabular-nums; display: inline-block; width: 26px; }
+  details summary { cursor: pointer; font-weight: 600; }
+  details[open] summary { margin-bottom: 12px; }
+  .judge { font-size: 15px; margin: 0 0 14px; }
+  .judge.round { font-size: 14px; color: var(--muted); margin: 0 0 4px; }
+  .feedback .labels { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .feedback .labels button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  .feedback input[type=text] { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--page); color: var(--ink); font: 14px var(--sans); }
+  .feedback label { display: block; font-size: 14px; margin: 8px 0; color: var(--muted); }
+  #fb-done { color: var(--pass); font-size: 14px; }
+  .error { color: var(--fail); }
+</style>
+</head>
+<body>
+<header><div class="bar"><span class="brand">UAIA <span class="tag">U ask, I answer</span></span><span id="status">Checking setup…</span></div></header>
+<main>
+  <h1>Answers that show their evidence</h1>
+  <p class="lede">Several models answer from the same sources. Every sentence is checked against the passage it cites, and a trained judge picks the better checked answer. Sentences the check could not confirm are underlined, and such answers are labeled partly verified.</p>
+  <form id="ask">
+    <textarea id="question" maxlength="4000" placeholder="Ask a factual question…" aria-label="Question" required></textarea>
+    <div class="row"><span class="hint">Enter to ask · Shift+Enter for a new line · usually 10–30 seconds</span><button class="primary" id="go" type="submit">Ask</button></div>
+  </form>
+  <div class="examples" id="examples"></div>
+  <p id="working"><span class="pulse"></span><span id="working-text">Searching, asking the models, checking every sentence…</span></p>
+  <div id="result"></div>
+</main>
+<script>
+const $ = (sel, root = document) => root.querySelector(sel);
+const el = (tag, attrs = {}, ...children) => {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "class") node.className = value; else if (key === "text") node.textContent = value; else node.setAttribute(key, value);
+  }
+  for (const child of children) if (child != null) node.append(child);
+  return node;
+};
+const safeUrl = (value) => /^https?:\/\//i.test(value || "") ? value : null;
+const host = (value) => { try { return new URL(value).hostname.replace(/^www\./, ""); } catch { return value; } };
+const pct = (p) => `${Math.round(p * 100)}%`;
+const plain = (text) => text.replace(/^\s*(?:[-*•]|\d+[.)]|#+)\s+/, "").replace(/\*\*|__|`/g, "");
+const EXAMPLES = [
+  "At what temperature does water boil at high altitude, and why?",
+  "According to the manual, what temperatures does Device Z operate in?",
+  "Who is the current Secretary-General of the United Nations?",
+];
+const FEEDBACK = [["useful", "Useful"], ["not_useful", "Not useful"], ["factual_issue", "Factual issue"], ["citation_issue", "Citation issue"], ["unclear", "Unclear"]];
+
+for (const text of EXAMPLES) {
+  const button = el("button", { type: "button", text });
+  button.addEventListener("click", () => { $("#question").value = text; $("#question").focus(); });
+  $("#examples").append(button);
+}
+
+async function loadStatus() {
+  try {
+    const s = await (await fetch("/api/status")).json();
+    const parts = [];
+    parts.push(s.judge ? `Judge ready (${s.judge.device})` : (s.judge_enabled ? "Judge not running — rule-based tie-break" : "Judge off"));
+    parts.push(s.answer_models.length ? `${s.answer_models.length} answer model${s.answer_models.length > 1 ? "s" : ""}` : "No answer models — add keys to .env");
+    parts.push(!s.keys.TAVILY_API_KEY ? "web search off" : s.search_price_usd == null ? "web search off — no search price set" : "web search on");
+    $("#status").textContent = parts.join(" · ");
+  } catch { $("#status").textContent = "Server not reachable"; }
+}
+loadStatus();
+
+$("#question").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); $("#ask").requestSubmit(); }
+});
+
+$("#ask").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const question = $("#question").value.trim();
+  if (!question) return;
+  $("#go").disabled = true; $("#result").replaceChildren();
+  const started = Date.now();
+  $("#working").classList.add("on");
+  const timer = setInterval(() => { $("#working-text").textContent = `Searching, asking the models, checking every sentence… ${Math.round((Date.now() - started) / 1000)}s`; }, 1000);
+  try {
+    const response = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    render(data, (Date.now() - started) / 1000);
+  } catch (error) {
+    $("#result").append(el("div", { class: "card" }, el("p", { class: "error", text: `Could not answer: ${error.message}` })));
+  } finally {
+    clearInterval(timer); $("#working").classList.remove("on"); $("#go").disabled = false;
+  }
+});
+
+function render(run, seconds) {
+  const result = $("#result");
+  const answerCard = el("div", { class: "card" });
+  const kinds = { verified_answer: ["verified", "Verified answer"], partly_verified: ["partly", "Partly verified"], abstained: ["abstained", "No verified answer"], source_quotes: ["verified", "Verified quotation"] };
+  const [kind, label] = kinds[run.outcome] || ["abstained", run.outcome];
+  answerCard.append(el("span", { class: `badge ${kind}`, text: label }));
+
+  const sources = new Map(run.evidence.map((p) => [p.id, p]));
+  const checks = run.selected_id ? run.checks[run.selected_id] : [];
+  const order = [];   // sources numbered in the order the answer first cites them
+  for (const check of checks) for (const id of (check.claim.source_id || "").split(",").filter(Boolean)) if (!order.includes(id)) order.push(id);
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // The checker names passages by internal id (e.g. web_3); show the numbers the reader sees instead.
+  const numbered = (text) => order.reduce((t, id, i) => t.replace(new RegExp(`(^|[^\\w-])${escapeRe(id)}(?![\\w-])`, "g"), `$1source [${i + 1}]`), text || "");
+  const modelName = (text) => run.candidates.reduce((t, c) => t.split(c.id).join(c.model), text || "");
+  const answer = el("p", { class: "answer" });
+  if (checks.length) {
+    checks.forEach((check, index) => {
+      const sentence = el("span", { class: check.status === "pass" ? "s-pass" : "s-unknown", text: plain(check.claim.text), title: `${check.status === "pass" ? "Supported" : "Not confirmed"}: ${numbered(check.reason)}` });
+      answer.append(sentence);
+      for (const id of (check.claim.source_id || "").split(",").filter(Boolean)) {
+        answer.append(el("a", { class: "cite", href: `#src-${order.indexOf(id) + 1}`, text: `[${order.indexOf(id) + 1}]`, title: sources.get(id)?.title || id }));
+      }
+      if (index < checks.length - 1) answer.append(" ");
+    });
+  } else {
+    answer.textContent = run.final_text;
+  }
+  answerCard.append(answer, el("p", { class: "note", text: run.uncertainty }));
+  result.append(answerCard);
+
+  if (order.length) {
+    const list = el("ol", { class: "sources" });
+    order.forEach((id, i) => {
+      const p = sources.get(id); if (!p) return;
+      const url = safeUrl(p.location);
+      const title = url ? el("a", { href: url, target: "_blank", rel: "noopener noreferrer", text: p.title }) : el("span", { text: p.title });
+      const meta = [url ? host(url) : p.location, p.published_at ? (isNaN(Date.parse(p.published_at)) ? p.published_at.slice(0, 25) : new Date(/^\d{4}-\d{2}-\d{2}$/.test(p.published_at) ? p.published_at + "T12:00:00" : p.published_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })) : null, p.fictional ? "fictional teaching example" : null].filter(Boolean).join(" · ");
+      list.append(el("li", { id: `src-${i + 1}` }, title, el("div", { class: "src-meta", text: meta })));
+    });
+    result.append(el("div", { class: "card" }, el("h2", { text: "Sources" }), list));
+  }
+
+  const how = el("details", { class: "card", open: "" }, el("summary", { text: "How this answer was chosen" }));
+  if (run.judge) {
+    // Every knockout round, then the outcome.
+    const rounds = run.judge.comparisons || [];
+    rounds.forEach((c, i) => {
+      const a = modelName(c.a_id), b = modelName(c.b_id);
+      how.append(el("p", { class: "judge round", text: `${rounds.length > 1 ? `Round ${i + 1} · ` : ""}${a} vs ${b}: P(${a} is better) = ${pct(c.p_a)} (order A→B ${pct(c.p_a_original_order)}, B→A ${pct(c.p_a_swapped_order)}, ${c.seconds}s)` }));
+    });
+    how.append(el("p", { class: "judge", text: `${modelName(run.judge.reason)}.` }));
+  }
+  const table = el("table", {}, el("tr", {}, el("th", { text: "Model" }), el("th", { text: "Status" }), el("th", { text: "Supported" }), el("th", { text: "Checks" })));
+  for (const c of run.candidates) {
+    const j = run.judgments.find((x) => x.candidate_id === c.id);
+    const row = el("tr", { class: c.id === run.selected_id ? "chosen" : "" },
+      el("td", { text: c.model + (c.id === run.selected_id ? " ✓" : "") }),
+      el("td", { text: c.status }),
+      el("td", { class: "num", text: j && j.total ? `${j.passed}/${j.total}` : "–" }),
+      el("td", { text: j ? j.reason : (c.error || "") }));
+    table.append(row);
+  }
+  if (run.candidates.length) how.append(el("div", { class: "table-wrap" }, table));
+  if (checks.length) {
+    const list = el("ul", { class: "plain checks" });
+    for (const check of checks) list.append(el("li", {}, el("span", { class: `dot ${check.status}` }), el("span", { text: `${plain(check.claim.text)} — ${numbered(check.reason)}` })));
+    how.append(el("h2", { text: "Sentence checks", style: "margin-top:16px" }), list);
+  }
+  const trace = el("ul", { class: "plain trace" });
+  for (const t of run.trace) trace.append(el("li", {}, el("span", { class: `dot ${t.status}` }), el("span", { class: "step", text: String(t.step).padStart(2, "0") }), el("span", { text: `${t.name}: ${t.detail}` })));
+  how.append(el("h2", { text: "All 13 steps", style: "margin-top:16px" }), trace,
+    el("p", { class: "note", text: [seconds ? `Answered in ${seconds.toFixed(1)}s` : null,
+      `Estimated cost $${run.estimated_cost_usd.toFixed(4)}${run.cost_complete ? "" : " (some costs unknown)"}`,
+      run.verifier ? `verifier ${run.verifier}` : null].filter(Boolean).join(" · ") }));
+  result.append(how);
+  result.append(feedbackCard(run.id));
+}
+
+function feedbackCard(runId) {
+  let chosen = null;
+  const card = el("div", { class: "card feedback" }, el("h2", { text: "Was this helpful?" }));
+  const labels = el("div", { class: "labels" });
+  for (const [value, text] of FEEDBACK) {
+    const button = el("button", { type: "button", "aria-pressed": "false", text });
+    button.addEventListener("click", () => { chosen = value; labels.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === button))); });
+    labels.append(button);
+  }
+  const note = el("input", { type: "text", maxlength: "2000", placeholder: "Optional note (what was wrong or missing?)" });
+  const consent = el("input", { type: "checkbox" });
+  const training = el("input", { type: "checkbox" });
+  const send = el("button", { type: "button", class: "primary", text: "Send feedback" });
+  const done = el("p", { id: "fb-done" });
+  send.addEventListener("click", async () => {
+    if (!chosen) { done.className = "error"; done.textContent = "Pick a rating first."; return; }
+    if (!consent.checked) { done.className = "error"; done.textContent = "Tick “Store this rating on this computer” to save it."; return; }
+    const response = await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ run_id: runId, label: chosen, note: note.value, consent: true, allow_training: training.checked }) });
+    const data = await response.json();
+    done.className = response.ok ? "" : "error";
+    done.textContent = response.ok ? "Saved for review. It never trains anything automatically." : (data.error || "Could not save");
+    if (response.ok) send.disabled = true;
+  });
+  card.append(labels, note,
+    el("label", {}, consent, " Store this rating on this computer (data/private/feedback.jsonl)"),
+    el("label", {}, training, " It may be used for future training after human review"),
+    send, done);
+  return card;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "baseline_id": "qwen_helpsteer2_v2_full_validation_binary_baseline_v2",
+  "reference": "Original Qwen, binary rubric, JSON, average both mapped answer orders, 311 clear labels",
+  "run_folder": "model selection/results/baseline_v2_20261007T004058039152Z",
+  "verification_receipt": "v2_verification.json",
+  "verification_receipt_sha256": "a1f7022ee2f082db56a6088be189533b7d38cb1684c17bb735ff93b8289dc561",
+  "baseline_v1_lock_sha256": "c4d0f9dd1c47ef68c7f7dae7086d56ed5419014b9521979ed07b92ad5a246eee",
+  "model_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "source_snapshot": "source_snapshot",
+  "note": "Fingerprint reference for future comparisons. Keep v1 and this run intact; use new run folders for later experiments."
+}

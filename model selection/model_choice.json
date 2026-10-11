@@ -1,0 +1,35 @@
+{
+  "selected_by": "user",
+  "selected_on": "2026-10-05",
+  "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+  "revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "local_directory": "models/Qwen3-4B-Instruct-2507",
+  "source": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507",
+  "license": "Apache-2.0",
+  "weight_format": "original BF16 safetensors",
+  "runner": "mlx-lm==0.32.0",
+  "first_task": "pairwise_general_preference",
+  "allowed_choices": [
+    "A",
+    "B",
+    "tie_preference"
+  ],
+  "training_dataset": "../Training Data/prepared/helpsteer2_v2",
+  "training_method_plan": "LoRA rank 8 on q/v in final 4 blocks; 20-update and 200-update trials completed; review errors before another controlled change",
+  "training_started": true,
+  "status": "baseline_v1_locked; expanded_200_update_trial_saved_reloaded_and_compared; experimental_not_integrated",
+  "runtime_versions": {
+    "mlx": "0.32.3",
+    "mlx-lm": "0.32.0",
+    "transformers": "5.18.0",
+    "huggingface-hub": "1.33.0"
+  },
+  "latest_teaching_report": "results/teaching_run_20261006T041018219907Z.json",
+  "latest_baseline_report": "results/baseline_20261006T100253287762Z/summary.json",
+  "baseline_lock_manifest": "baseline_v1.lock.json",
+  "latest_training_readiness_report": "results/training_readiness_20261006T101929653463Z/probe_result.json",
+  "latest_training_trial_report": "results/expanded_trial_20261006T132929116227Z/comparison.json",
+  "latest_experimental_adapter": "results/expanded_trial_20261006T132929116227Z/adapter",
+  "first_training_trial_report": "results/training_trial_20261006T104025828291Z/comparison.json",
+  "first_experimental_adapter": "results/training_trial_20261006T104025828291Z/adapter"
+}

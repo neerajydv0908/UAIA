@@ -1,0 +1,23 @@
+{
+  "providers": [
+    {
+      "provider": "openai",
+      "model": "gpt-6-sol",
+      "input_usd_per_million": null,
+      "output_usd_per_million": null
+    },
+    {
+      "provider": "anthropic",
+      "model": "claude-sonnet-5",
+      "input_usd_per_million": null,
+      "output_usd_per_million": null
+    }
+  ],
+  "limits": {
+    "max_calls": 2,
+    "call_timeout_seconds": 20,
+    "request_timeout_seconds": 30,
+    "max_output_tokens": 1024,
+    "max_estimated_usd": 0
+  }
+}

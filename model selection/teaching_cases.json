@@ -1,0 +1,53 @@
+[
+  {
+    "id": "library_A",
+    "input": {
+      "question": "When does this fictional library open?",
+      "evidence": [
+        {
+          "id": "opening_notice",
+          "text": "The Willow Library opens at 9 am."
+        }
+      ],
+      "answers": {
+        "A": "It opens at 9 am.",
+        "B": "It opens at 10 am."
+      }
+    },
+    "expected": "A"
+  },
+  {
+    "id": "library_B_swapped",
+    "input": {
+      "question": "When does this fictional library open?",
+      "evidence": [
+        {
+          "id": "opening_notice",
+          "text": "The Willow Library opens at 9 am."
+        }
+      ],
+      "answers": {
+        "A": "It opens at 10 am.",
+        "B": "It opens at 9 am."
+      }
+    },
+    "expected": "B"
+  },
+  {
+    "id": "equal_answers",
+    "input": {
+      "question": "How long is the fictional lesson?",
+      "evidence": [
+        {
+          "id": "lesson_notice",
+          "text": "Each lesson lasts 60 minutes."
+        }
+      ],
+      "answers": {
+        "A": "The lesson lasts one hour.",
+        "B": "The lesson lasts 60 minutes."
+      }
+    },
+    "expected": "tie_preference"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "question": "According to the supplied manual, what is Device Z's operating temperature range?",
+  "replies": [
+    {
+      "id": "sample_a",
+      "text": "Device Z operates from 0 to 60 degrees Celsius in dry conditions. [device_z_operating]",
+      "delay_seconds": 0.02
+    },
+    {
+      "id": "sample_b",
+      "text": "Device Z operates from 0 to 40 degrees Celsius in dry conditions. [device_z_operating]",
+      "delay_seconds": 0.01
+    }
+  ]
+}

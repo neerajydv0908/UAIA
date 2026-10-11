@@ -1,0 +1,17 @@
+{
+  "providers": [
+    {"provider": "anthropic", "model": "claude-sonnet-5-5", "input_usd_per_million": 2, "output_usd_per_million": 10},
+    {"provider": "openai", "model": "gpt-6.1-sol", "input_usd_per_million": 5, "output_usd_per_million": 30},
+    {"provider": "anthropic", "model": "claude-haiku-5-5", "input_usd_per_million": 0.1, "output_usd_per_million": 0.5},
+    {"provider": "openai", "model": "gpt-6-luna", "input_usd_per_million": 0.2, "output_usd_per_million": 1.2}
+  ],
+  "verifier": {"provider": "anthropic", "model": "claude-haiku-5-5", "input_usd_per_million": 0.1, "output_usd_per_million": 0.5},
+  "search_usd_per_call": 0.008,
+  "limits": {
+    "max_calls": 3,
+    "call_timeout_seconds": 45,
+    "request_timeout_seconds": 120,
+    "max_output_tokens": 2048,
+    "max_estimated_usd": 0.4
+  }
+}

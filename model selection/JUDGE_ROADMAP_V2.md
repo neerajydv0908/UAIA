@@ -1,0 +1,63 @@
+# Revised judge roadmap: measurement first
+
+**Current milestone, October 7:** the corrected Colab run finished at **81.0% clear validation accuracy**, with improved probability quality. The next [data-curve milestone](DATA_CURVE_PLAN.md) is prepared with a 400-pair training-side monitor, 4,646 eligible clear training pairs, seeded later-epoch shuffling and optional strength weights. No data-curve GPU job has started; the historical roadmap below retains its dated context.
+
+Selected roadmap, October 6, 2026. **Groups A–D come before any further training.** The previous proposed 29-tie content review is dropped. This roadmap replaces that next step, while preserving all earlier runs and reports as history. Read [the exact v2 protocol](BASELINE_V2_PROTOCOL.md) and [the live/completed milestone report](BASELINE_V2.md) for execution status.
+
+This document adopts the direction of the 28 proposed measures. It distinguishes implemented measurement work, future experiments, and claims that need qualification. Dates such as “Day 1” and “Week 2” describe sequence, not scheduled jobs or guaranteed completion times.
+
+## A. Measure properly — current milestone
+
+1. Use **all 396 validation pairs in both orders**. Primary accuracy uses the **311 clear A/B labels**. Keep the **85 ties** as a diagnostic. There are 395 question groups; preserve every pair and account for the repeated question in uncertainty calculations.
+2. Read next-token scores rather than parse generated labels. Verified A/B token IDs are 32/33. The `tie` prefix is 48731, but the historical full tie label has two tokens. Save logits and full-vocabulary log probabilities; use the two-way A/B normalization for log-loss and AUC. These probabilities are initially uncalibrated.
+3. Report preference-strength slices, the shorter-winner slice, original/swapped agreement, and whether averaged tie-labelled probabilities approach 0.5. Define length as character count before scoring.
+4. Use 95% group bootstrap intervals and paired comparisons. Exact McNemar uses one predefined representative per question group; retain all pairs in headline accuracy. Apply Holm adjustment to the three primary tests. The saved protocol fixes a 3-point practical accuracy target and the separate 0.02 log-loss route for format selection before inference.
+5. Establish original Qwen as **baseline v2**, re-score both existing adapters, and include always-B and longer-answer rules. Keep v1 locked. Skywork remains optional: its model card uses Transformers/PyTorch, and its paper describes a much larger preference-data mixture and benchmark cleaning. The inspected sources do not establish that our HelpSteer2 validation questions are absent from its training. Do not call it an uncontaminated reference without further provenance/overlap work. It is not downloaded in this milestone. [Model card](https://huggingface.co/Skywork/Skywork-Reward-V2-Qwen3-4B/blob/main/README.md), [paper](https://arxiv.org/html/2507.01352v1).
+
+## B. Fix the task definition — adopted direction, training deferred
+
+6. Future binary training uses A/B examples; do not teach the literal tie label as a third class in that experiment. The earlier cap admitted **5,037 A/B pairs**, out of 5,147 total A/B training pairs. Recheck lengths in the selected format before preparing a run. Every inspected training/validation tie contains opposing reviewer votes, but split votes can reflect real ambiguity rather than meaningless noise. Exclusion is an explicit modelling choice, not a changed publisher label. NVIDIA recommends the preference annotations for pairwise Bradley–Terry learning. A two-token decision head is a pairwise classifier; it is not automatically the same architecture as a scalar per-answer Bradley–Terry reward model. [Dataset card](https://huggingface.co/datasets/nvidia/HelpSteer2#preferences-new---1-oct-2024).
+7. Produce a “too close to call” outcome from the averaged A/B margin. The v2 protocol fixes a small candidate band grid and validation selection rule. Save the selected width and every alternative. This is separate from evidence adequacy and final probability calibration.
+8. Investigate preference strength with a **controlled training comparison**: unweighted A/B learning versus strength weighting, or a strength-2/3 subset. Hold other settings fixed and compare validation log-loss, accuracy, and uncertainty. No variant is declared better in advance. This is a future experiment, not a training run performed during A–D.
+9. Drop the 29-tie content-review detour. Keep labels and historical observations; proceed through the new measurement protocol.
+
+## C. Fix what the model reads — current format experiment
+
+10. Compare the existing JSON payload with plain-text question/A/B sections and actual line breaks.
+11. In the candidate format, rewrite NVIDIA User/Assistant markers in the question into readable turn labels. Do not turn embedded text into executable instructions or change the actual chat roles.
+12. Omit the empty evidence field from preference-only inputs. This cannot teach evidence checking; that needs source-based data later.
+13. Test the full formatting bundle on original Qwen without training. The two formats use the same new binary rubric. Apply the preregistered selection rule; use the selected template identically in later training and evaluation. Use original Qwen's measured row in that same selected format as the control for future training comparisons. The current four-run milestone evaluates the two old adapters in the JSON control format, matching the baseline-v2 comparison. Their training used the older three-choice task, which remains a limitation of this historical comparison.
+
+## D. Fix decisions and calibration — current scoring, later calibration
+
+14. Score both orders and average probabilities after mapping them to the same original answer. This makes the combination order-symmetric by construction, but it does not eliminate every bias or guarantee accuracy. An always-first judge can average to 50/50. Report the benefit or harm against each single order.
+15. Fit temperature scaling **only after the model, input format, and evaluation recipe are fixed**. Use the 775-example calibration portion then; do not touch it during prompt or training selection. Applying a single temperature to the final averaged log-odds is one candidate convention to specify before calibration. Keep the 769-example test portion unopened until the final evaluation.
+
+## E. Train properly — next phase after A–D
+
+16. Begin with about **2,000 eligible A/B pairs**, each in both orders, then expand toward all eligible pairs. Select by fixed question groups using training data only. Reuse no validation question or AI diagnostic note as a teaching example.
+17. Probe broader **LoRA**, small learned additions to the frozen base: all 36 transformer blocks, rank 16, dropout 0.05, scale 20. The installed MLX-LM helper accepts `num_layers: 36`; omitting `keys` discovers supported modules inside the blocks. This includes the block projections for this model, not a promise that every model-wide embedding/output head is adapted. Record actual matched module names and trainable parameter count during the probe.
+18. Accumulate eight examples before each optimizer update, keeping both orientations of a pair in that same update. An optimizer update changes trainable numbers; an example is one presentation, so counts differ. Propose roughly 50 warm-up updates then cosine decay, one or two passes, and a stop rule fixed before training. Check scheduler and accumulation behavior in the pinned library.
+19. Create a new **train_judge.py** for the revised training stage; preserve the earlier protected/reference runners. Compare learning rates `1e-5`, `2e-5`, and `5e-5` for a bounded approximately 150-update sweep with the same data order, initialization, and settings. Rank by the reserved training-side monitor log-loss; use full validation after checkpoint selection and retain accuracy/slice diagnostics. A sweep with accumulation consumes many more example presentations than 150; record both counts and an explicit wall-time budget.
+20. Prefer a two-way A/B cross-entropy at the verified decision-token position, aligning the training objective with v2 evaluation. Test target swapping, hidden-label masking, gradient flow into adapters only, and agreement with a hand-worked loss. Strength weighting, if tried, is a separate controlled change.
+21. Monitor a fixed 100-pair **validation** subset about every 100 updates; save all measurements and choose the best checkpoint by that loss. Keep question groups intact when selecting the subset. Run the full validation on the selected checkpoint, preserving the declared selection process. Save optimizer state, scheduler position, random state, and data-order/cursor information, not only adapter weights. Test that an interrupted/resumed run reproduces uninterrupted updates before relying on overnight resumption.
+22. Re-run a short memory and speed probe for the new setup before the sweep or long run. Do not assume the earlier 9.32-GiB fit applies to broader rank-16 adapters and accumulation. Use the measured speed to choose the local budget. Colab Pro/PyTorch/PEFT or TRL is a possible alternative if needed, with a separate environment and measured cost. A 4-bit copy is also a separate experiment: compare its untrained full-validation scores against original precision first, including intervals and log-loss, before accepting it as a cheaper base.
+
+The three-rate sweep is now measured: `2e-5` at update 150 had the lowest fixed-monitor log-loss. This was the winner of the earlier uncorrected optimizer recipe. The corrected recipe requires a new rate sweep before longer training. The 2,000-pair training pass and strength-weighting comparisons remain unrun.
+
+## F. Better data — after the pipeline works
+
+23. Evaluate adding **HelpSteer3-Preference** as the next public source. Verify its exact release, size, and permitted use before downloading; run cross-source question/document overlap checks against all reserved portions before admitting training data. Keep groups across related questions and source variants together.
+24. Build evidence-conditioned examples: start with permitted source passages, draft a supported answer, and make targeted corruptions of numbers, dates, units, negation, or conditions. Check that the corruption changes a relevant claim and that the supposed correct answer is actually supported. Labels are not guaranteed correct merely because a generator made the pair. Keep generated training examples distinct from a human-reviewed test collection. Include both-supported, both-unsupported, and insufficient-evidence cases with definitions different from a preference tie. Partition by source document before generating variants.
+
+## G. Experiment discipline — begins now
+
+25. Preregister hypotheses, the changed component or bounded sweep, metrics, minimum gains, and stop criteria. Keep one comparable result table with intervals; no more promotion based on a one-sentence change tested only on sixty questions. Never merge v1 three-class scores with v2 binary scores as if their denominators and task were identical.
+26. Keep the baseline lock. Do complete historical fingerprint checks once per milestone, rather than hashing the large base model before every worker. Continue cheap per-input checks and separately save each run. A second random seed is an optional later stability test after choosing the final training setup.
+27. Evaluate the **769-example final test exactly once** after model, format, margin, and calibration rules are locked. Do not choose later settings from those results. If a discovered problem forces redesign after testing, disclose it and obtain a new untouched test collection rather than quietly reusing this test for selection.
+
+## H. Product integration — only after the judge earns it
+
+28. Connect the measured judge at answerlab's judging step only after the judge stage qualifies. The present product accepts exact document quotations; real generated answers need claim extraction and semantic source-support checks as separate tested work. Compare the complete product with the current rule judge and one strong model under the same spending allowance. Preserve final-output rechecking, uncertainty, abstention, and reviewed offline feedback. A preference judge's score is not evidence that an answer is true.
+
+The product, fine-tuning an existing judge, and pretraining a tiny model from scratch remain separate tracks; this roadmap changes the main judge-development sequence.

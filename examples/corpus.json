@@ -1,0 +1,26 @@
+[
+  {
+    "id": "device_z_operating",
+    "title": "Fictional Device Z manual, operating conditions",
+    "text": "Device Z operates from 0 to 40 degrees Celsius in dry conditions.",
+    "location": "examples/corpus.json#device_z_operating",
+    "published_at": "2026-09-28",
+    "fictional": true
+  },
+  {
+    "id": "device_z_storage",
+    "title": "Fictional Device Z manual, storage conditions",
+    "text": "Device Z can be stored from -10 to 60 degrees Celsius while powered off.",
+    "location": "examples/corpus.json#device_z_storage",
+    "published_at": "2026-09-28",
+    "fictional": true
+  },
+  {
+    "id": "device_z_warranty",
+    "title": "Fictional Device Z manual, warranty",
+    "text": "Device Z has a one-year warranty for manufacturing defects.",
+    "location": "examples/corpus.json#device_z_warranty",
+    "published_at": "2026-09-28",
+    "fictional": true
+  }
+]

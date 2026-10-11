@@ -1,0 +1,38 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.*
+!.env.example
+.DS_Store
+build/
+dist/
+data/raw/
+Training Data/raw/
+Training Data/prepared/
+data/private/
+checkpoints/
+runs/
+config.local.toml
+config.local.json
+
+# Local judge environment, original weights, and generated run files
+/model selection/.venv/
+/model selection/models/
+/model selection/results/
+/model selection/.hf-cache/
+
+# Local frozen baseline contains copied public sample records
+/model selection/frozen_baseline_v1/
+
+# Separate Colab preparation environment and generated public-data upload
+/model selection/.colab-venv/
+/model selection/colab/Judge_Colab_Package.zip
+
+# Private notes and research PDFs: kept on this computer, never published
+/private/
+
+# Large local archives
+/model selection/colab/Judge_A100_FullData_Package.zip
+judge_adapter*.zip
